@@ -82,40 +82,69 @@ For current weather data, use the following format:
 ```bash
 https://api.weatherapi.com/v1/current.json?key=YOUR_API_KEY&q=CITY_NAME
 
-## 🧠 Step 3: Connect Power BI to WeatherAPI
+# Step 3: Connect Power BI to WeatherAPI
 1. Open **Power BI Desktop**.  
-2. Click **Get Data → Web**.  
-3. Enter your WeatherAPI URL.  
-4. Click **OK**.
+2. Home → **Get Data** → **Web**.  
+3. Paste your WeatherAPI URL (e.g. `https://api.weatherapi.com/v1/current.json?key=YOUR_API_KEY&q=CITY_NAME`).  
+4. Click **OK** and wait for the preview to load.
 
 ---
 
-## 🧹 Step 4: Transform the Data
-In the **Power Query Editor**:
-- Expand the **current** record.  
-- Expand sub-records like `condition` or `air_quality`.  
-- Rename columns for clarity.  
-- Click **Close & Apply**.
+# Step 4: Transform the Data
+In **Power Query Editor**:  
+- Select the `current` record column and click the **expand** icon (⤓) to expand it.  
+- Expand nested fields like `condition` and `air_quality` (tick only fields you need).  
+- Rename columns for clarity (e.g., `temp_c` → `Temperature (°C)`, `air_quality.pm2_5` → `PM2.5`).  
+- Change data types (decimal number, whole number, datetime) as appropriate.  
+- Remove unnecessary columns and apply any calculated columns or transformations.  
+- Click **Close & Apply** to load data into your model.
+
+**Tip:** Use Power Query parameters for `key` and `q` (city) so the query is reusable and easy to update.
 
 ---
 
-## 📊 Step 5: Build Your Dashboard
-Add:
-- ✅ **Cards** for temperature, humidity, etc.  
-- ✅ **Gauges** for wind speed.  
-- ✅ **Charts** for daily variations.  
-Also set up **filters/slicers** for different cities.
+# Step 5: Build Your Dashboard
+Add visuals and layout:  
+- **Cards** for current values: Temperature, Humidity, Pressure, AQI.  
+- **Gauges** for wind speed or AQI ranges.  
+- **Line / Area charts** for hourly/daily trends (temperature, humidity).  
+- **Table / Matrix** for detailed forecast rows.  
+- **Slicers** for City, Date range, Units (C/F).  
+- **Map visual** to plot city locations (optional).
+
+Arrange: top row summary cards, middle trend charts, bottom detail table/map for clarity.
 
 ---
 
-## 🎨 Step 6: Styling & Interactivity
-- Insert **icons** representing the current weather.  
-- Plot the **map visual** with city locations.  
-- Allow users to select cities dynamically.
+# Step 6: Styling & Interactivity
+- Add weather icons via image URLs or an images table; use conditional formatting for visuals.  
+- Use **bookmarks** and **buttons** for toggles (e.g., Hourly vs Daily).  
+- Edit visual interactions so selected visuals filter others as intended.  
+- Configure tooltips to show extra context (time, units, data source).  
+- Apply a consistent theme (backgrounds, fonts); consider semi-transparent backgrounds for a glassmorphism look.
 
 ---
 
-## ⚡ Step 7: Adding AQI Indicators with Reusable Measures
-You can incorporate **Air Quality Index (AQI)** data into your report using the `current.air_quality` section of the WeatherAPI response (create measures/columns to categorize and visualize AQI).
+# Step 7: Adding AQI Indicators with Reusable Measures
+Pull AQI fields from the API (e.g., `pm2_5`, `pm10`, `us-epa-index`, or `us-epi`). Create measures to categorize AQI and drive visuals.
+
+**AQI Category (DAX)**
+
+```dax
+AQI Category =
+VAR AQIValue = SELECTEDVALUE('WeatherData'[AQI])
+RETURN
+SWITCH(
+    TRUE(),
+    AQIValue = BLANK(), "Unknown",
+    AQIValue <= 50, "Good",
+    AQIValue <= 100, "Moderate",
+    AQIValue <= 150, "Unhealthy for Sensitive Groups",
+    AQIValue <= 200, "Unhealthy",
+    AQIValue <= 300, "Very Unhealthy",
+    "Hazardous"
+)
+
+
 
 
